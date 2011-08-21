@@ -19,9 +19,7 @@ $property: font-size !default
 $class-slug: ms !default
 
 // Modular Scale function
-@function ms($multiple, $base-size, $ratio)
-
-
+@function modular-scale($multiple, $base-size, $ratio)
   // return the $base-size if $multiple is zero
   @if $multiple == 0
     @return $base-size
@@ -43,7 +41,7 @@ $class-slug: ms !default
         $modular-scale: $base-size
         // do the scale using this ratio thru the multiple, and add the result to $scale-values
         @for $i from 1 through $multiple
-          $modular-scale: position($base-size, $i, nth($ratio, $j))
+          $modular-scale: exponent($base-size, $i, nth($ratio, $j))
           $scale-values: append($scale-values, $modular-scale)
         $j: $j + 1
       // sort acsending      
@@ -59,7 +57,7 @@ $class-slug: ms !default
         $modular-scale: $base-size
         // do the scale using this ratio thru the multiple, and add the result to $scale-values
         @for $i from 1 through ($multiple * -1)
-          $modular-scale: position($base-size, -$i, nth($ratio, $j))
+          $modular-scale: exponent($base-size, -$i, nth($ratio, $j))
           $scale-values: append($scale-values, $modular-scale)
         $j: $j + 1
       // sort acsending
@@ -69,22 +67,20 @@ $class-slug: ms !default
 
   // if one ratio is passed in as a number
   @if type-of($ratio) == 'number'
-    // calculate the nth position
-    $modular-scale: position($base-size, $multiple, $ratio)
+    // calculate the nth exponent
+    $modular-scale: exponent($base-size, $multiple, $ratio)
     // Return the value of $modular-scale
     @return $modular-scale
-
-
-
+  
 // Shortcut
-@function modular-scale($multiple, $base-size, $ratio)
+@function ms($multiple, $base-size, $ratio)
   // Return the value from the Modular Scale function
-  @return ms($multiple, $base-size, $ratio)
+  @return modular-scale($multiple, $base-size, $ratio)
 
 // Mixin
 =modular-scale($property, $multiple, $base-size, $ratio)
   // Print the $property and return the value from the Modular Scale function
-  #{$property}: ms($multiple, $base-size, $ratio)
+  #{$property}: modular-scale($multiple, $base-size, $ratio)
 
 // Classes Mixin
 =modular-scale-classes($multiple, $property, $class-slug, $base-size, $ratio)
@@ -95,40 +91,24 @@ $class-slug: ms !default
 
 
 
-// Sass exponent support
-@function exponent($base, $exponent)
-  // reset value
-  $value: $base
-  // positive intergers get multiplied
-  @if $exponent > 1
-    @for $i from 2 through $exponent
-      $value: $value * $base
-  // negitive intergers get divided. A number divided by itself is 1
-  @if $exponent < 1
-    @for $i from 0 through -$exponent
-      $value: $value / $base
-  // return the last value written
-  @return ($value)
-
-
 // Calculate position on a scale
-@function position($base, $multiple, $ratio)
-  // initialise $position as 0
-  $position: $base
+@function exponent($base, $multiple, $ratio)
+  // initialise $exponent as 0
+  $exponent: $base
   
   @if $multiple == 0
-    @return $position
+    @return $exponent
   
   // If $multiple is a positive integer (up the scale)
   @if $multiple > 0
     @for $i from 1 through ($multiple)
-      $position: $position * $ratio
+      $exponent: $exponent * $ratio
   // If $multiple is a negative integer (down the scale)
   @if $multiple < 0
     @for $i from 1 through ($multiple * -1)
-      $position: $position / $ratio
-  // return the calculated position
-  @return $position
+      $exponent: $exponent / $ratio
+  // return the calculated exponent
+  @return $exponent
 
         
               

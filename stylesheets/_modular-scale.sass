@@ -24,10 +24,12 @@ $class-slug: ms !default
     // Prevent calculating for multiple ratios and base-sizes
     @if type-of($base-size) == 'list'
       @return ("Multiple base-sizes and ratios is not supported at this time")
-    // logic for multiple ratios here
+    // logic for multiple ratios
+    
     @return ("Multiple ratio test")
   @if type-of($base-size) == 'list'
-    // logic for multiple base-sizes here
+    // logic for multiple base-sizes
+    
     @return ("Multiple base-size test")
   // If there are no lists just run the simple function
   @return (exponent($ratio, $multiple) * $base-size)
