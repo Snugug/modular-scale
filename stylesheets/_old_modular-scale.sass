@@ -20,20 +20,61 @@ $class-slug: ms !default
 
 // Modular Scale function
 @function ms($multiple, $base-size, $ratio)
+
+
+  // return the $base-size if $multiple is zero
+  @if $multiple == 0
+    @return $base-size
+    
+  // initialise $modular-scale as $base-size
+  $modular-scale: $base-size
+
+  // if multiple ratios are passed in as a list
+  // calculate values in using each ratio
   @if type-of($ratio) == 'list'
-    // Prevent calculating for multiple ratios and base-sizes
-    @if type-of($base-size) == 'list'
-      @return ("Multiple base-sizes and ratios is not supported at this time")
-    // logic for multiple ratios here
-    @return ("Multiple ratio test")
-  @if type-of($base-size) == 'list'
-    // logic for multiple base-sizes here
-    @return ("Multiple base-size test")
-  // If there are no lists just run the simple function
-  @return (exponent($ratio, $multiple) * $base-size)
+    // start with an empty list to place all values in
+    $scale-values: ()
+    // If $multiple is a positive integer (up the scale)
+    @if $multiple > 0
+      $j: 1
+      // take each ratio in turn
+      @while $j <= length($ratio)
+        // reset $modular-scale for each set
+        $modular-scale: $base-size
+        // do the scale using this ratio thru the multiple, and add the result to $scale-values
+        @for $i from 1 through $multiple
+          $modular-scale: position($base-size, $i, nth($ratio, $j))
+          $scale-values: append($scale-values, $modular-scale)
+        $j: $j + 1
+      // sort acsending      
+      $scale-values: sort-list($scale-values)
+      // return the final value using the laced list
+      @return nth($scale-values, $multiple)
+    // If $multiple is a negative integer (down the scale)
+    @if $multiple < 0
+      $j: 1
+      // take each ratio in turn
+      @while $j <= length($ratio)
+        // reset $modular-scale for each set
+        $modular-scale: $base-size
+        // do the scale using this ratio thru the multiple, and add the result to $scale-values
+        @for $i from 1 through ($multiple * -1)
+          $modular-scale: position($base-size, -$i, nth($ratio, $j))
+          $scale-values: append($scale-values, $modular-scale)
+        $j: $j + 1
+      // sort acsending
+      $scale-values: sort-list($scale-values, 'dec')
+      // return the final value using the laced list
+      @return nth($scale-values, $multiple * -1)
+
+  // if one ratio is passed in as a number
+  @if type-of($ratio) == 'number'
+    // calculate the nth position
+    $modular-scale: position($base-size, $multiple, $ratio)
+    // Return the value of $modular-scale
+    @return $modular-scale
 
 
-/////////////////////////////////////////////////////////////////////////
 
 // Shortcut
 @function modular-scale($multiple, $base-size, $ratio)
@@ -53,7 +94,6 @@ $class-slug: ms !default
       +modular-scale($property, $i, $base-size, $ratio)
 
 
-/////////////////////////////////////////////////////////////////////////
 
 // Sass exponent support
 @function exponent($base, $exponent)
@@ -90,7 +130,8 @@ $class-slug: ms !default
   // return the calculated position
   @return $position
 
-
+        
+              
 // Sass list sorting support
 @function sort-list($list, $dir: 'asc')
   // built-in list sorting in Sass would make this go away.
